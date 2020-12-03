@@ -50,9 +50,13 @@ func main() {
 	}
 	file.Close()
 
-	var correctPasswords = 0
+	var passData []PasswordData
 	for _, text := range texts {
-		pass := createPasswordData(text)
+		passData = append(passData, createPasswordData(text))
+	}
+
+	var correctPasswords = 0
+	for _, pass := range passData {
 		numberOfOccurrence := strings.Count(pass.password, pass.pattern)
 		if numberOfOccurrence >= pass.min && numberOfOccurrence <= pass.max {
 			correctPasswords++
@@ -61,8 +65,7 @@ func main() {
 	fmt.Println("Number of correct passwords for counting", correctPasswords)
 
 	correctPasswords = 0
-	for _, text := range texts {
-		pass := createPasswordData(text)
+	for _, pass := range passData {
 		firstCorrect := string(pass.password[pass.min-1]) == pass.pattern
 		secondCorrect := string(pass.password[pass.max-1]) == pass.pattern
 		if firstCorrect != secondCorrect {
