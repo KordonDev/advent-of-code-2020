@@ -57,7 +57,6 @@ func main() {
 	fmt.Println("Number of possible bags for shiny gold", countBagColors)
 
 	bagCount := 0
-	checkedBags = make(map[string]string)
 	var bagsToCheck2 []BagMultiplyer
 	bagsToCheck2 = append(bagsToCheck2, BagMultiplyer{bagColor: "shinygold", multiplier: 1})
 
@@ -69,7 +68,38 @@ func main() {
 			bagCount = bagCount + currentBagsMultiplier
 			bagsToCheck2 = append(bagsToCheck2, BagMultiplyer{bagColor: nextBag.bagColor, multiplier: currentBagsMultiplier})
 		}
-		checkedBags[bag.bagColor] = "1"
 	}
-	fmt.Println(bagCount)
+	fmt.Println("Bag count loop", bagCount)
+
+	fmt.Println("Bag count recursive", nextBag2("shinygold", &numberOfBagsAreInBag))
+}
+
+func nextBag(bagColor string, numberOfBagsAreInBag *map[string][]BagMultiplyer) int {
+	nextBags, found := (*numberOfBagsAreInBag)[bagColor]
+	// fmt.Println(nextBags, found)
+	if !found {
+		fmt.Println(1, bagColor)
+		return 1
+	}
+	allBagsInBag := 1
+	fmt.Println("add 1", bagColor)
+	for _, bag := range nextBags {
+		next := nextBag(bag.bagColor, numberOfBagsAreInBag)
+		allBagsInBag = allBagsInBag + bag.multiplier*next
+		fmt.Println(bag.bagColor, bag.multiplier, "*", next, "=", allBagsInBag)
+	}
+	fmt.Println("return ", bagColor, allBagsInBag)
+	return allBagsInBag
+}
+
+func nextBag2(bagColor string, numberOfBagsAreInBag *map[string][]BagMultiplyer) int {
+	nextBags, found := (*numberOfBagsAreInBag)[bagColor]
+	if !found {
+		return 1
+	}
+	allBagsInBag := 1
+	for _, bag := range nextBags {
+		allBagsInBag = allBagsInBag + bag.multiplier*nextBag2(bag.bagColor, numberOfBagsAreInBag)
+	}
+	return allBagsInBag
 }
