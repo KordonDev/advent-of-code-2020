@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -30,4 +31,23 @@ func stringToInt(s string) int {
 		log.Fatal(err)
 	}
 	return value
+}
+
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
+// sort max to min
+func sortMaxToMin(ints *[]int) {
+	sort.Ints(*ints)
+	sort.SliceStable(*ints, func(i, j int) bool {
+		return j < i
+	})
+}
+
+func sortMixToMax(ints *[]int) {
+	sort.Ints(*ints)
 }

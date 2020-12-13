@@ -1,138 +1,108 @@
---- Day 10: Adapter Array ---
-Patched into the aircraft's data port, you discover weather forecasts of a massive tropical storm. Before you can figure out whether it will impact your vacation plans, however, your device suddenly turns off!
+--- Day 13: Shuttle Search ---
+Your ferry can make it safely to a nearby port, but it won't get much further. When you call to book another ship, you discover that no ships embark from that port to your vacation island. You'll need to get from the port to the nearest airport.
 
-Its battery is dead.
+Fortunately, a shuttle bus service is available to bring you from the sea port to the airport! Each bus has an ID number that also indicates how often the bus leaves for the airport.
 
-You'll need to plug it in. There's only one problem: the charging outlet near your seat produces the wrong number of jolts. Always prepared, you make a list of all of the joltage adapters in your bag.
+Bus schedules are defined based on a timestamp that measures the number of minutes since some fixed reference point in the past. At timestamp 0, every bus simultaneously departed from the sea port. After that, each bus travels to the airport, then various other locations, and finally returns to the sea port to repeat its journey forever.
 
-Each of your joltage adapters is rated for a specific output joltage (your puzzle input). Any given adapter can take an input 1, 2, or 3 jolts lower than its rating and still produce its rated output joltage.
+The time this loop takes a particular bus is also its ID number: the bus with ID 5 departs from the sea port at timestamps 0, 5, 10, 15, and so on. The bus with ID 11 departs at 0, 11, 22, 33, and so on. If you are there when the bus departs, you can ride that bus to the airport!
 
-In addition, your device has a built-in joltage adapter rated for 3 jolts higher than the highest-rated adapter in your bag. (If your adapter list were 3, 9, and 6, your device's built-in adapter would be rated for 12 jolts.)
+Your notes (your puzzle input) consist of two lines. The first line is your estimate of the earliest timestamp you could depart on a bus. The second line lists the bus IDs that are in service according to the shuttle company; entries that show x must be out of service, so you decide to ignore them.
 
-Treat the charging outlet near your seat as having an effective joltage rating of 0.
+To save time once you arrive, your goal is to figure out the earliest bus you can take to the airport. (There will be exactly one such bus.)
 
-Since you have some time to kill, you might as well test all of your adapters. Wouldn't want to get to your resort and realize you can't even charge your device!
+For example, suppose you have the following notes:
 
-If you use every adapter in your bag at once, what is the distribution of joltage differences between the charging outlet, the adapters, and your device?
+939
+7,13,x,x,59,x,31,19
+Here, the earliest timestamp you could depart is 939, and the bus IDs in service are 7, 13, 59, 31, and 19. Near timestamp 939, these bus IDs depart at the times marked D:
 
-For example, suppose that in your bag, you have adapters with the following joltage ratings:
+time   bus 7   bus 13  bus 59  bus 31  bus 19
+929      .       .       .       .       .
+930      .       .       .       D       .
+931      D       .       .       .       D
+932      .       .       .       .       .
+933      .       .       .       .       .
+934      .       .       .       .       .
+935      .       .       .       .       .
+936      .       D       .       .       .
+937      .       .       .       .       .
+938      D       .       .       .       .
+939      .       .       .       .       .
+940      .       .       .       .       .
+941      .       .       .       .       .
+942      .       .       .       .       .
+943      .       .       .       .       .
+944      .       .       D       .       .
+945      D       .       .       .       .
+946      .       .       .       .       .
+947      .       .       .       .       .
+948      .       .       .       .       .
+949      .       D       .       .       .
+The earliest bus you could take is bus ID 59. It doesn't depart until timestamp 944, so you would need to wait 944 - 939 = 5 minutes before it departs. Multiplying the bus ID by the number of minutes you'd need to wait gives 295.
 
-16
-10
-15
-5
-1
-11
-7
-19
-6
-12
-4
-With these adapters, your device's built-in joltage adapter would be rated for 19 + 3 = 22 jolts, 3 higher than the highest-rated adapter.
+What is the ID of the earliest bus you can take to the airport multiplied by the number of minutes you'll need to wait for that bus?
 
-Because adapters can only connect to a source 1-3 jolts lower than its rating, in order to use every adapter, you'd need to choose them like this:
-
-The charging outlet has an effective rating of 0 jolts, so the only adapters that could connect to it directly would need to have a joltage rating of 1, 2, or 3 jolts. Of these, only one you have is an adapter rated 1 jolt (difference of 1).
-From your 1-jolt rated adapter, the only choice is your 4-jolt rated adapter (difference of 3).
-From the 4-jolt rated adapter, the adapters rated 5, 6, or 7 are valid choices. However, in order to not skip any adapters, you have to pick the adapter rated 5 jolts (difference of 1).
-Similarly, the next choices would need to be the adapter rated 6 and then the adapter rated 7 (with difference of 1 and 1).
-The only adapter that works with the 7-jolt rated adapter is the one rated 10 jolts (difference of 3).
-From 10, the choices are 11 or 12; choose 11 (difference of 1) and then 12 (difference of 1).
-After 12, only valid adapter has a rating of 15 (difference of 3), then 16 (difference of 1), then 19 (difference of 3).
-Finally, your device's built-in adapter is always 3 higher than the highest adapter, so its rating is 22 jolts (always a difference of 3).
-In this example, when using every adapter, there are 7 differences of 1 jolt and 5 differences of 3 jolts.
-
-Here is a larger example:
-
-28
-33
-18
-42
-31
-14
-46
-20
-48
-47
-24
-23
-49
-45
-19
-38
-39
-11
-1
-32
-25
-35
-8
-17
-7
-9
-4
-2
-34
-10
-3
-In this larger example, in a chain that uses all of the adapters, there are 22 differences of 1 jolt and 10 differences of 3 jolts.
-
-Find a chain that uses all of your adapters to connect the charging outlet to your device's built-in adapter and count the joltage differences between the charging outlet, the adapters, and your device. What is the number of 1-jolt differences multiplied by the number of 3-jolt differences?
-
-Your puzzle answer was 1998.
+Your puzzle answer was 410.
 
 --- Part Two ---
-To completely determine whether you have enough adapters, you'll need to figure out how many different ways they can be arranged. Every arrangement needs to connect the charging outlet to your device. The previous rules about when adapters can successfully connect still apply.
+The shuttle company is running a contest: one gold coin for anyone that can find the earliest timestamp such that the first bus ID departs at that time and each subsequent listed bus ID departs at that subsequent minute. (The first line in your input is no longer relevant.)
 
-The first example above (the one that starts with 16, 10, 15) supports the following arrangements:
+For example, suppose you have the same list of bus IDs as above:
 
-(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 6, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 5, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 6, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 6, 7, 10, 12, 15, 16, 19, (22)
-(0), 1, 4, 7, 10, 11, 12, 15, 16, 19, (22)
-(0), 1, 4, 7, 10, 12, 15, 16, 19, (22)
-(The charging outlet and your device's built-in adapter are shown in parentheses.) Given the adapters from the first example, the total number of arrangements that connect the charging outlet to your device is 8.
+7,13,x,x,59,x,31,19
+An x in the schedule means there are no constraints on what bus IDs must depart at that time.
 
-The second example above (the one that starts with 28, 33, 18) has many arrangements. Here are a few:
+This means you are looking for the earliest timestamp (called t) such that:
 
-(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, (52)
+Bus ID 7 departs at timestamp t.
+Bus ID 13 departs one minute after timestamp t.
+There are no requirements or restrictions on departures at two or three minutes after timestamp t.
+Bus ID 59 departs four minutes after timestamp t.
+There are no requirements or restrictions on departures at five minutes after timestamp t.
+Bus ID 31 departs six minutes after timestamp t.
+Bus ID 19 departs seven minutes after timestamp t.
+The only bus departures that matter are the listed bus IDs at their specific offsets from t. Those bus IDs can depart at other times, and other bus IDs can depart at those times. For example, in the list above, because bus ID 19 must depart seven minutes after the timestamp at which bus ID 7 departs, bus ID 7 will always also be departing with bus ID 19 at seven minutes after timestamp t.
 
-(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 49, (52)
+In this example, the earliest timestamp at which this occurs is 1068781:
 
-(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-32, 33, 34, 35, 38, 39, 42, 45, 46, 48, 49, (52)
+time     bus 7   bus 13  bus 59  bus 31  bus 19
+1068773    .       .       .       .       .
+1068774    D       .       .       .       .
+1068775    .       .       .       .       .
+1068776    .       .       .       .       .
+1068777    .       .       .       .       .
+1068778    .       .       .       .       .
+1068779    .       .       .       .       .
+1068780    .       .       .       .       .
+1068781    D       .       .       .       .
+1068782    .       D       .       .       .
+1068783    .       .       .       .       .
+1068784    .       .       .       .       .
+1068785    .       .       D       .       .
+1068786    .       .       .       .       .
+1068787    .       .       .       D       .
+1068788    D       .       .       .       D
+1068789    .       .       .       .       .
+1068790    .       .       .       .       .
+1068791    .       .       .       .       .
+1068792    .       .       .       .       .
+1068793    .       .       .       .       .
+1068794    .       .       .       .       .
+1068795    D       D       .       .       .
+1068796    .       .       .       .       .
+1068797    .       .       .       .       .
+In the above example, bus ID 7 departs at timestamp 1068788 (seven minutes after t). This is fine; the only requirement on that minute is that bus ID 19 departs then, and it does.
 
-(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-32, 33, 34, 35, 38, 39, 42, 45, 46, 49, (52)
+Here are some other examples:
 
-(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-32, 33, 34, 35, 38, 39, 42, 45, 47, 48, 49, (52)
+The earliest timestamp that matches the list 17,x,13,19 is 3417.
+67,7,59,61 first occurs at timestamp 754018.
+67,x,7,59,61 first occurs at timestamp 779210.
+67,7,x,59,61 first occurs at timestamp 1261476.
+1789,37,47,1889 first occurs at timestamp 1202161486.
+However, with so many bus IDs in your list, surely the actual earliest timestamp will be larger than 100000000000000!
 
-(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-46, 48, 49, (52)
+What is the earliest timestamp such that all of the listed bus IDs depart at offsets matching their positions in the list?
 
-(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-46, 49, (52)
-
-(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-47, 48, 49, (52)
-
-(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-47, 49, (52)
-
-(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-48, 49, (52)
-In total, this set of adapters can connect the charging outlet to your device in 19208 distinct arrangements.
-
-You glance back down at your bag and try to remember why you brought so many adapters; there must be more than a trillion valid ways to arrange them! Surely, there must be an efficient way to count the arrangements.
-
-What is the total number of distinct ways you can arrange the adapters to connect the charging outlet to your device?
-
-Your puzzle answer was 347250213298688.
-
-Both parts of this puzzle are complete! They provide two gold stars: **
+Your puzzle answer was 600691418730595.

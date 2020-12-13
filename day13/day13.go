@@ -31,10 +31,12 @@ func main() {
 	highestInterval := 0
 	highestIntervalIndex := 0
 	busIntervalsList := make(map[int]int)
+	var intervals []int
 	for index, intervalString := range intervalTimes {
 		if intervalString != "x" {
 			interval := stringToInt(intervalString)
 			busIntervalsList[interval] = index
+			intervals = append(intervals, interval)
 			if interval > highestInterval {
 				highestInterval = interval
 				highestIntervalIndex = index
@@ -46,13 +48,61 @@ func main() {
 	for interval, index := range busIntervalsList {
 		busIntervalsList[interval] = index - highestIntervalIndex
 	}
-	fmt.Println(busIntervalsList)
 
+	sortMaxToMin(&intervals)
+
+	nextGab := 0
+	base := 0
+	nextBase := 0
+	gab := intervals[0]
+	search := intervals[0]
+	for i := 1; i <= len(intervals); i++ {
+		currentInterval := intervals[0:i]
+		for nextGab == 0 {
+			if areDeparturesValidForTime(search, &currentInterval, &busIntervalsList) {
+				if nextBase == 0 {
+					nextBase = search
+				} else {
+					nextGab = search - nextBase
+				}
+			}
+			search = search + gab
+		}
+		gab = nextGab
+		base = nextBase
+		search = base
+		nextBase = 0
+		nextGab = 0
+	}
+	fmt.Println("Generic Solution 2", base+busIntervalsList[stringToInt(intervalTimes[0])])
+
+	// solutionForMyInput(&busIntervalsList, highestIntervalIndex)
+
+}
+func areDeparturesValidForTime(checkTime int, intervals *[]int, intervalTimes *(map[int]int)) bool {
+	for _, check := range *intervals {
+		if (checkTime+(*intervalTimes)[check])%check != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func isListOfDepartures(checkTime int, intervalTimes *(map[int]int)) bool {
+	for interval, offset := range *intervalTimes {
+		if (checkTime+offset)%interval != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func solutionForMyInput(busIntervalsList *(map[int]int), highestIntervalIndex int) {
 	gabBetweenBiggestNumbers := 0
 	firstFound := 0
 	search := 593
 	for gabBetweenBiggestNumbers == 0 {
-		if search%593 == 0 && (search-31)%433 == 0 && (search-41)%41 == 0 && (search-68)%37 == 0 && (search-2)%29 == 0 { // && (search-23)%23 == 0 && (search-12)%19 == 0 {
+		if search%593 == 0 && (search-31)%433 == 0 && (search-41)%41 == 0 && (search-68)%37 == 0 && (search-2)%29 == 0 {
 			if firstFound == 0 {
 				firstFound = search
 			} else {
@@ -66,36 +116,13 @@ func main() {
 	smallestTimestamp := 0
 	checkTime := firstFound
 
-	//58420380058973072 is too big
-	for smallestTimestamp == 0 && checkTime < 100000000000000000 {
-		if isListOfDepartures(checkTime, &busIntervalsList) {
+	for smallestTimestamp == 0 {
+		if isListOfDepartures(checkTime, busIntervalsList) {
 			smallestTimestamp = checkTime
 		}
 		checkTime = checkTime + gabBetweenBiggestNumbers
 	}
 
 	fmt.Println("Solution 2", smallestTimestamp-highestIntervalIndex)
-}
 
-func isListOfDepartures(checkTime int, intervalTimes *(map[int]int)) bool {
-	for interval, offset := range *intervalTimes {
-		if (checkTime+offset)%interval != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func directionWithSteps(s string) (string, int) {
-	split := strings.SplitN(s, "", 2)
-	direction := split[0]
-	steps := stringToInt(split[1])
-	return direction, steps
-}
-
-func abs(i int) int {
-	if i < 0 {
-		return -i
-	}
-	return i
 }
