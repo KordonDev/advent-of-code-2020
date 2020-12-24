@@ -9,17 +9,15 @@ import (
 type Node struct {
 	value int
 	next  *Node
-	last  *Node
 }
 
 func (n *Node) AddNode(value int) *Node {
-	newNode := Node{value, nil, nil}
+	newNode := Node{value, nil}
 	iter := n
 	for iter.next != nil {
 		iter = iter.next
 	}
 	iter.next = &newNode
-	newNode.last = iter
 	return &newNode
 }
 

@@ -13,7 +13,7 @@ func main() {
 	for _, number := range lines[0] {
 		num := stringToInt(string(number))
 		if currentNode == nil {
-			currentNode = &Node{num, nil, nil}
+			currentNode = &Node{num, nil}
 			lastNode = currentNode
 		} else {
 			lastNode = lastNode.AddNode(num)
@@ -28,7 +28,6 @@ func main() {
 		lookup[i+1] = lastNode
 	}
 	lastNode.next = currentNode
-	currentNode.last = lastNode
 
 	rounds := 1
 	for rounds <= 10000000 {
@@ -49,13 +48,8 @@ func main() {
 		}
 
 		currentNode.next = endPickup.next
-		endPickup.next.last = currentNode
-
 		endPickup.next = insertAfter.next
-		insertAfter.next.last = endPickup
-
 		insertAfter.next = pickup
-		pickup.last = insertAfter
 
 		currentNode = currentNode.next
 		rounds++
