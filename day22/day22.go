@@ -22,32 +22,29 @@ func main() {
 		}
 		*arrayToFill = append(*arrayToFill, stringToInt(line))
 	}
-	fmt.Println(len(player1Cards))
-	fmt.Println(len(player2Cards))
 	player1 := player1Cards
 	player2 := player2Cards
-	/*
-		var winner *([]int)
-		var card1 int
-		var card2 int
-		for player1Cards[0] != player2Cards[len(player2Cards)-1] && player2Cards[0] != player1Cards[len(player1Cards)-1] {
-			card1, player1Cards = player1Cards[0], player1Cards[min(1, len(player1Cards)-1):]
-			card2, player2Cards = player2Cards[0], player2Cards[min(1, len(player2Cards)-1):]
-			if card1 > card2 {
-				player1Cards = append(player1Cards, []int{card1, card2}...)
-				winner = &player1Cards
-			}
-			if card2 > card1 {
-				player2Cards = append(player2Cards, []int{card2, card1}...)
-				winner = &player2Cards
-			}
+	var winner *([]int)
+	var card1 int
+	var card2 int
+	for player1Cards[0] != player2Cards[len(player2Cards)-1] && player2Cards[0] != player1Cards[len(player1Cards)-1] {
+		card1, player1Cards = player1Cards[0], player1Cards[min(1, len(player1Cards)-1):]
+		card2, player2Cards = player2Cards[0], player2Cards[min(1, len(player2Cards)-1):]
+		if card1 > card2 {
+			player1Cards = append(player1Cards, []int{card1, card2}...)
+			winner = &player1Cards
 		}
+		if card2 > card1 {
+			player2Cards = append(player2Cards, []int{card2, card1}...)
+			winner = &player2Cards
+		}
+	}
 
-		score := calculteScore(winner)
-		fmt.Println("Solution 1:", score)*/
-	winn, winCards := subgame(player1, player2)
-	fmt.Println(len(winCards))
-	fmt.Println("Solution 2", winn, calculteScore(&winCards), &winCards)
+	score := calculteScore(winner)
+	fmt.Println("Solution 1:", score)
+
+	_, winCards := subgame(player1, player2)
+	fmt.Println("Solution 2:", calculteScore(&winCards))
 
 }
 
@@ -57,23 +54,18 @@ func subgame(player1 []int, player2 []int) (int, []int) {
 	var card1 int
 	var card2 int
 	var winner int
-	for player1[0] != player2[len(player2)-1] && player2[0] != player1[len(player1)-1] {
-		// fmt.Println("round", player1, player2)
-		if gameHasBeenPlayed(&prevCardsPlayer1, &prevCardsPlayer2, player1, player2) {
-			fmt.Println("same game")
+
+	for len(player1) > 0 && len(player2) > 0 {
+		if gameHasBeenPlayed(&prevCardsPlayer1, &prevCardsPlayer2, &player1, &player2) {
 			return 1, player1
 		}
 		winner = -1
-		sub := false
-		card1, player1 = player1[0], player1[min(1, len(player1)-1):]
-		card2, player2 = player2[0], player2[min(1, len(player2)-1):]
+		card1, player1 = player1[0], player1[1:]
+		card2, player2 = player2[0], player2[1:]
 		if card1 <= len(player1) && card2 <= len(player2) {
-			p1 := copyList(player1[0:card1])
-			p2 := copyList(player2[0:card2])
-			fmt.Println("round", player1, player2, card1, card2)
-			fmt.Println("start subgame", p1, p2)
+			p1 := copyList(player1[:card1])
+			p2 := copyList(player2[:card2])
 			winner, _ = subgame(p1, p2)
-			sub = true
 		}
 		if winner == 1 || winner == -1 && card1 > card2 {
 			player1 = append(player1, []int{card1, card2}...)
@@ -83,43 +75,26 @@ func subgame(player1 []int, player2 []int) (int, []int) {
 			player2 = append(player2, []int{card2, card1}...)
 			winner = 2
 		}
-		if sub {
-			fmt.Println("after subgame", player1, player2, winner)
-		}
 	}
-	fmt.Println("end", player1, player2, winner)
 	if winner == 1 {
 		return winner, player1
 	}
 	return winner, player2
 }
 
-func gameHasBeenPlayed(prevCardsPlayer1 *[][]int, prevCardsPlayer2 *[][]int, player1 []int, player2 []int) bool {
+func gameHasBeenPlayed(prevCardsPlayer1 *[][]int, prevCardsPlayer2 *[][]int, player1 *[]int, player2 *[]int) bool {
 	for i := 0; i < len(*prevCardsPlayer2); i++ {
-		bothSame := true
-		currentPrevPlayer1 := (*prevCardsPlayer1)[i]
-		currentPrevPlayer2 := (*prevCardsPlayer2)[i]
-		if len(currentPrevPlayer1) != len(player1) || len(currentPrevPlayer2) != len(player2) {
-			continue
+		currentPrevPlayer1 := &((*prevCardsPlayer1)[i])
+		if sameElements(player1, currentPrevPlayer1) {
+			return true
 		}
-		for j := 0; j < len(currentPrevPlayer1); j++ {
-			if currentPrevPlayer1[j] != player1[j] {
-				bothSame = false
-				break
-			}
-		}
-		for j := 0; j < len(currentPrevPlayer2); j++ {
-			if currentPrevPlayer2[j] != player2[j] {
-				bothSame = false
-				break
-			}
-		}
-		if bothSame {
+		currentPrevPlayer2 := &((*prevCardsPlayer2)[i])
+		if sameElements(player2, currentPrevPlayer2) {
 			return true
 		}
 	}
-	*prevCardsPlayer1 = append(*prevCardsPlayer1, copyList(player1))
-	*prevCardsPlayer2 = append(*prevCardsPlayer2, copyList(player2))
+	*prevCardsPlayer1 = append(*prevCardsPlayer1, copyList(*player1))
+	*prevCardsPlayer2 = append(*prevCardsPlayer2, copyList(*player2))
 	return false
 }
 
@@ -137,4 +112,16 @@ func calculteScore(winnerCards *[]int) int {
 		multiplyer--
 	}
 	return score
+}
+
+func sameElements(list1 *[]int, list2 *[]int) bool {
+	if len(*list1) != len(*list2) {
+		return false
+	}
+	for i := range *list1 {
+		if (*list1)[i] != (*list2)[i] {
+			return false
+		}
+	}
+	return true
 }
