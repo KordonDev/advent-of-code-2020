@@ -1,134 +1,376 @@
---- Day 19: Monster Messages ---
-You land in an airport surrounded by dense forest. As you walk to your high-speed train, the Elves at the Mythical Information Bureau contact you again. They think their satellite has collected an image of a sea monster! Unfortunately, the connection to the satellite is having problems, and many of the messages sent back from the satellite have been corrupted.
+--- Day 22: Crab Combat ---
+It only takes a few hours of sailing the ocean on a raft for boredom to sink in. Fortunately, you brought a small deck of space cards! You'd like to play a game of Combat, and there's even an opponent available: a small crab that climbed aboard your raft before you left.
 
-They sent you a list of the rules valid messages should obey and a list of received messages they've collected so far (your puzzle input).
+Fortunately, it doesn't take long to teach the crab the rules.
 
-The rules for valid messages (the top part of your puzzle input) are numbered and build upon each other. For example:
+Before the game starts, split the cards so each player has their own deck (your puzzle input). Then, the game consists of a series of rounds: both players draw their top card, and the player with the higher-valued card wins the round. The winner keeps both cards, placing them on the bottom of their own deck so that the winner's card is above the other card. If this causes a player to have all of the cards, they win, and the game ends.
 
-0: 1 2
-1: "a"
-2: 1 3 | 3 1
-3: "b"
-Some rules, like 3: "b", simply match a single character (in this case, b).
+For example, consider the following starting decks:
 
-The remaining rules list the sub-rules that must be followed; for example, the rule 0: 1 2 means that to match rule 0, the text being checked must match rule 1, and the text after the part that matched rule 1 must then match rule 2.
+Player 1:
+9
+2
+6
+3
+1
 
-Some of the rules have multiple lists of sub-rules separated by a pipe (|). This means that at least one list of sub-rules must match. (The ones that match might be different each time the rule is encountered.) For example, the rule 2: 1 3 | 3 1 means that to match rule 2, the text being checked must match rule 1 followed by rule 3 or it must match rule 3 followed by rule 1.
+Player 2:
+5
+8
+4
+7
+10
+This arrangement means that player 1's deck contains 5 cards, with 9 on top and 1 on the bottom; player 2's deck also contains 5 cards, with 5 on top and 10 on the bottom.
 
-Fortunately, there are no loops in the rules, so the list of possible matches will be finite. Since rule 1 matches a and rule 3 matches b, rule 2 matches either ab or ba. Therefore, rule 0 matches aab or aba.
+The first round begins with both players drawing the top card of their decks: 9 and 5. Player 1 has the higher card, so both cards move to the bottom of player 1's deck such that 9 is above 5. In total, it takes 29 rounds before a player has all of the cards:
 
-Here's a more interesting example:
+-- Round 1 --
+Player 1's deck: 9, 2, 6, 3, 1
+Player 2's deck: 5, 8, 4, 7, 10
+Player 1 plays: 9
+Player 2 plays: 5
+Player 1 wins the round!
 
-0: 4 1 5
-1: 2 3 | 3 2
-2: 4 4 | 5 5
-3: 4 5 | 5 4
-4: "a"
-5: "b"
-Here, because rule 4 matches a and rule 5 matches b, rule 2 matches two letters that are the same (aa or bb), and rule 3 matches two letters that are different (ab or ba).
+-- Round 2 --
+Player 1's deck: 2, 6, 3, 1, 9, 5
+Player 2's deck: 8, 4, 7, 10
+Player 1 plays: 2
+Player 2 plays: 8
+Player 2 wins the round!
 
-Since rule 1 matches rules 2 and 3 once each in either order, it must match two pairs of letters, one pair with matching letters and one pair with different letters. This leaves eight possibilities: aaab, aaba, bbab, bbba, abaa, abbb, baaa, or babb.
+-- Round 3 --
+Player 1's deck: 6, 3, 1, 9, 5
+Player 2's deck: 4, 7, 10, 8, 2
+Player 1 plays: 6
+Player 2 plays: 4
+Player 1 wins the round!
 
-Rule 0, therefore, matches a (rule 4), then any of the eight options from rule 1, then b (rule 5): aaaabb, aaabab, abbabb, abbbab, aabaab, aabbbb, abaaab, or ababbb.
+-- Round 4 --
+Player 1's deck: 3, 1, 9, 5, 6, 4
+Player 2's deck: 7, 10, 8, 2
+Player 1 plays: 3
+Player 2 plays: 7
+Player 2 wins the round!
 
-The received messages (the bottom part of your puzzle input) need to be checked against the rules so you can determine which are valid and which are corrupted. Including the rules and the messages together, this might look like:
+-- Round 5 --
+Player 1's deck: 1, 9, 5, 6, 4
+Player 2's deck: 10, 8, 2, 7, 3
+Player 1 plays: 1
+Player 2 plays: 10
+Player 2 wins the round!
 
-0: 4 1 5
-1: 2 3 | 3 2
-2: 4 4 | 5 5
-3: 4 5 | 5 4
-4: "a"
-5: "b"
+...several more rounds pass...
 
-ababbb
-bababa
-abbbab
-aaabbb
-aaaabbb
-Your goal is to determine the number of messages that completely match rule 0. In the above example, ababbb and abbbab match, but bababa, aaabbb, and aaaabbb do not, producing the answer 2. The whole message must match all of rule 0; there can't be extra unmatched characters in the message. (For example, aaaabbb might appear to match rule 0 above, but it has an extra unmatched b on the end.)
+-- Round 27 --
+Player 1's deck: 5, 4, 1
+Player 2's deck: 8, 9, 7, 3, 2, 10, 6
+Player 1 plays: 5
+Player 2 plays: 8
+Player 2 wins the round!
 
-How many messages completely match rule 0?
+-- Round 28 --
+Player 1's deck: 4, 1
+Player 2's deck: 9, 7, 3, 2, 10, 6, 8, 5
+Player 1 plays: 4
+Player 2 plays: 9
+Player 2 wins the round!
 
-Your puzzle answer was 222.
+-- Round 29 --
+Player 1's deck: 1
+Player 2's deck: 7, 3, 2, 10, 6, 8, 5, 9, 4
+Player 1 plays: 1
+Player 2 plays: 7
+Player 2 wins the round!
+
+
+== Post-game results ==
+Player 1's deck:
+Player 2's deck: 3, 2, 10, 6, 8, 5, 9, 4, 7, 1
+Once the game ends, you can calculate the winning player's score. The bottom card in their deck is worth the value of the card multiplied by 1, the second-from-the-bottom card is worth the value of the card multiplied by 2, and so on. With 10 cards, the top card is worth the value on the card multiplied by 10. In this example, the winning player's score is:
+
+   3 * 10
++  2 *  9
++ 10 *  8
++  6 *  7
++  8 *  6
++  5 *  5
++  9 *  4
++  4 *  3
++  7 *  2
++  1 *  1
+= 306
+So, once the game ends, the winning player's score is 306.
+
+Play the small crab in a game of Combat using the two decks you just dealt. What is the winning player's score?
+
+Your puzzle answer was 31314.
 
 --- Part Two ---
-As you look over the list of messages, you realize your matching rules aren't quite right. To fix them, completely replace rules 8: 42 and 11: 42 31 with the following:
+You lost to the small crab! Fortunately, crabs aren't very good at recursion. To defend your honor as a Raft Captain, you challenge the small crab to a game of Recursive Combat.
 
-8: 42 | 42 8
-11: 42 31 | 42 11 31
-This small change has a big impact: now, the rules do contain loops, and the list of messages they could hypothetically match is infinite. You'll need to determine how these changes affect which messages are valid.
+Recursive Combat still starts by splitting the cards into two decks (you offer to play with the same starting decks as before - it's only fair). Then, the game consists of a series of rounds with a few changes:
 
-Fortunately, many of the rules are unaffected by this change; it might help to start by looking at which rules always match the same set of values and how those rules (especially rules 42 and 31) are used by the new versions of rules 8 and 11.
+Before either player deals a card, if there was a previous round in this game that had exactly the same cards in the same order in the same players' decks, the game instantly ends in a win for player 1. Previous rounds from other games are not considered. (This prevents infinite games of Recursive Combat, which everyone agrees is a bad idea.)
+Otherwise, this round's cards must be in a new configuration; the players begin the round by each drawing the top card of their deck as normal.
+If both players have at least as many cards remaining in their deck as the value of the card they just drew, the winner of the round is determined by playing a new game of Recursive Combat (see below).
+Otherwise, at least one player must not have enough cards left in their deck to recurse; the winner of the round is the player with the higher-value card.
+As in regular Combat, the winner of the round (even if they won the round by winning a sub-game) takes the two cards dealt at the beginning of the round and places them on the bottom of their own deck (again so that the winner's card is above the other card). Note that the winner's card might be the lower-valued of the two cards if they won the round due to winning a sub-game. If collecting cards by winning the round causes a player to have all of the cards, they win, and the game ends.
 
-(Remember, you only need to handle the rules you have; building a solution that could handle any hypothetical combination of rules would be significantly more difficult.)
+Here is an example of a small game that would loop forever without the infinite game prevention rule:
 
-For example:
+Player 1:
+43
+19
 
-42: 9 14 | 10 1
-9: 14 27 | 1 26
-10: 23 14 | 28 1
-1: "a"
-11: 42 31
-5: 1 14 | 15 1
-19: 14 1 | 14 14
-12: 24 14 | 19 1
-16: 15 1 | 14 14
-31: 14 17 | 1 13
-6: 14 14 | 1 14
-2: 1 24 | 14 4
-0: 8 11
-13: 14 3 | 1 12
-15: 1 | 14
-17: 14 2 | 1 7
-23: 25 1 | 22 14
-28: 16 1
-4: 1 1
-20: 14 14 | 1 15
-3: 5 14 | 16 1
-27: 1 6 | 14 18
-14: "b"
-21: 14 1 | 1 14
-25: 1 1 | 1 14
-22: 14 14
-8: 42
-26: 14 22 | 1 20
-18: 15 15
-7: 14 5 | 1 21
-24: 14 1
+Player 2:
+2
+29
+14
+During a round of Recursive Combat, if both players have at least as many cards in their own decks as the number on the card they just dealt, the winner of the round is determined by recursing into a sub-game of Recursive Combat. (For example, if player 1 draws the 3 card, and player 2 draws the 7 card, this would occur if player 1 has at least 3 cards left and player 2 has at least 7 cards left, not counting the 3 and 7 cards that were drawn.)
 
-abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa
-bbabbbbaabaabba
-babbbbaabbbbbabbbbbbaabaaabaaa
-aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-bbbbbbbaaaabbbbaaabbabaaa
-bbbababbbbaaaaaaaabbababaaababaabab
-ababaaaaaabaaab
-ababaaaaabbbaba
-baabbaaaabbaaaababbaababb
-abbbbabbbbaaaababbbbbbaaaababb
-aaaaabbaabaaaaababaa
-aaaabbaaaabbaaa
-aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-babaaabbbaaabaababbaabababaaab
-aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba
-Without updating rules 8 and 11, these rules only match three messages: bbabbbbaabaabba, ababaaaaaabaaab, and ababaaaaabbbaba.
+To play a sub-game of Recursive Combat, each player creates a new deck by making a copy of the next cards in their deck (the quantity of cards copied is equal to the number on the card they drew to trigger the sub-game). During this sub-game, the game that triggered it is on hold and completely unaffected; no cards are removed from players' decks to form the sub-game. (For example, if player 1 drew the 3 card, their deck in the sub-game would be copies of the next three cards in their deck.)
 
-However, after updating rules 8 and 11, a total of 12 messages match:
+Here is a complete example of gameplay, where Game 1 is the primary game of Recursive Combat:
 
-bbabbbbaabaabba
-babbbbaabbbbbabbbbbbaabaaabaaa
-aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-bbbbbbbaaaabbbbaaabbabaaa
-bbbababbbbaaaaaaaabbababaaababaabab
-ababaaaaaabaaab
-ababaaaaabbbaba
-baabbaaaabbaaaababbaababb
-abbbbabbbbaaaababbbbbbaaaababb
-aaaaabbaabaaaaababaa
-aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba
-After updating rules 8 and 11, how many messages completely match rule 0?
+=== Game 1 ===
 
-Your puzzle answer was 339.
+-- Round 1 (Game 1) --
+Player 1's deck: 9, 2, 6, 3, 1
+Player 2's deck: 5, 8, 4, 7, 10
+Player 1 plays: 9
+Player 2 plays: 5
+Player 1 wins round 1 of game 1!
+
+-- Round 2 (Game 1) --
+Player 1's deck: 2, 6, 3, 1, 9, 5
+Player 2's deck: 8, 4, 7, 10
+Player 1 plays: 2
+Player 2 plays: 8
+Player 2 wins round 2 of game 1!
+
+-- Round 3 (Game 1) --
+Player 1's deck: 6, 3, 1, 9, 5
+Player 2's deck: 4, 7, 10, 8, 2
+Player 1 plays: 6
+Player 2 plays: 4
+Player 1 wins round 3 of game 1!
+
+-- Round 4 (Game 1) --
+Player 1's deck: 3, 1, 9, 5, 6, 4
+Player 2's deck: 7, 10, 8, 2
+Player 1 plays: 3
+Player 2 plays: 7
+Player 2 wins round 4 of game 1!
+
+-- Round 5 (Game 1) --
+Player 1's deck: 1, 9, 5, 6, 4
+Player 2's deck: 10, 8, 2, 7, 3
+Player 1 plays: 1
+Player 2 plays: 10
+Player 2 wins round 5 of game 1!
+
+-- Round 6 (Game 1) --
+Player 1's deck: 9, 5, 6, 4
+Player 2's deck: 8, 2, 7, 3, 10, 1
+Player 1 plays: 9
+Player 2 plays: 8
+Player 1 wins round 6 of game 1!
+
+-- Round 7 (Game 1) --
+Player 1's deck: 5, 6, 4, 9, 8
+Player 2's deck: 2, 7, 3, 10, 1
+Player 1 plays: 5
+Player 2 plays: 2
+Player 1 wins round 7 of game 1!
+
+-- Round 8 (Game 1) --
+Player 1's deck: 6, 4, 9, 8, 5, 2
+Player 2's deck: 7, 3, 10, 1
+Player 1 plays: 6
+Player 2 plays: 7
+Player 2 wins round 8 of game 1!
+
+-- Round 9 (Game 1) --
+Player 1's deck: 4, 9, 8, 5, 2
+Player 2's deck: 3, 10, 1, 7, 6
+Player 1 plays: 4
+Player 2 plays: 3
+Playing a sub-game to determine the winner...
+
+=== Game 2 ===
+
+-- Round 1 (Game 2) --
+Player 1's deck: 9, 8, 5, 2
+Player 2's deck: 10, 1, 7
+Player 1 plays: 9
+Player 2 plays: 10
+Player 2 wins round 1 of game 2!
+
+-- Round 2 (Game 2) --
+Player 1's deck: 8, 5, 2
+Player 2's deck: 1, 7, 10, 9
+Player 1 plays: 8
+Player 2 plays: 1
+Player 1 wins round 2 of game 2!
+
+-- Round 3 (Game 2) --
+Player 1's deck: 5, 2, 8, 1
+Player 2's deck: 7, 10, 9
+Player 1 plays: 5
+Player 2 plays: 7
+Player 2 wins round 3 of game 2!
+
+-- Round 4 (Game 2) --
+Player 1's deck: 2, 8, 1
+Player 2's deck: 10, 9, 7, 5
+Player 1 plays: 2
+Player 2 plays: 10
+Player 2 wins round 4 of game 2!
+
+-- Round 5 (Game 2) --
+Player 1's deck: 8, 1
+Player 2's deck: 9, 7, 5, 10, 2
+Player 1 plays: 8
+Player 2 plays: 9
+Player 2 wins round 5 of game 2!
+
+-- Round 6 (Game 2) --
+Player 1's deck: 1
+Player 2's deck: 7, 5, 10, 2, 9, 8
+Player 1 plays: 1
+Player 2 plays: 7
+Player 2 wins round 6 of game 2!
+The winner of game 2 is player 2!
+
+...anyway, back to game 1.
+Player 2 wins round 9 of game 1!
+
+-- Round 10 (Game 1) --
+Player 1's deck: 9, 8, 5, 2
+Player 2's deck: 10, 1, 7, 6, 3, 4
+Player 1 plays: 9
+Player 2 plays: 10
+Player 2 wins round 10 of game 1!
+
+-- Round 11 (Game 1) --
+Player 1's deck: 8, 5, 2
+Player 2's deck: 1, 7, 6, 3, 4, 10, 9
+Player 1 plays: 8
+Player 2 plays: 1
+Player 1 wins round 11 of game 1!
+
+-- Round 12 (Game 1) --
+Player 1's deck: 5, 2, 8, 1
+Player 2's deck: 7, 6, 3, 4, 10, 9
+Player 1 plays: 5
+Player 2 plays: 7
+Player 2 wins round 12 of game 1!
+
+-- Round 13 (Game 1) --
+Player 1's deck: 2, 8, 1
+Player 2's deck: 6, 3, 4, 10, 9, 7, 5
+Player 1 plays: 2
+Player 2 plays: 6
+Playing a sub-game to determine the winner...
+
+=== Game 3 ===
+
+-- Round 1 (Game 3) --
+Player 1's deck: 8, 1
+Player 2's deck: 3, 4, 10, 9, 7, 5
+Player 1 plays: 8
+Player 2 plays: 3
+Player 1 wins round 1 of game 3!
+
+-- Round 2 (Game 3) --
+Player 1's deck: 1, 8, 3
+Player 2's deck: 4, 10, 9, 7, 5
+Player 1 plays: 1
+Player 2 plays: 4
+Playing a sub-game to determine the winner...
+
+=== Game 4 ===
+
+-- Round 1 (Game 4) --
+Player 1's deck: 8
+Player 2's deck: 10, 9, 7, 5
+Player 1 plays: 8
+Player 2 plays: 10
+Player 2 wins round 1 of game 4!
+The winner of game 4 is player 2!
+
+...anyway, back to game 3.
+Player 2 wins round 2 of game 3!
+
+-- Round 3 (Game 3) --
+Player 1's deck: 8, 3
+Player 2's deck: 10, 9, 7, 5, 4, 1
+Player 1 plays: 8
+Player 2 plays: 10
+Player 2 wins round 3 of game 3!
+
+-- Round 4 (Game 3) --
+Player 1's deck: 3
+Player 2's deck: 9, 7, 5, 4, 1, 10, 8
+Player 1 plays: 3
+Player 2 plays: 9
+Player 2 wins round 4 of game 3!
+The winner of game 3 is player 2!
+
+...anyway, back to game 1.
+Player 2 wins round 13 of game 1!
+
+-- Round 14 (Game 1) --
+Player 1's deck: 8, 1
+Player 2's deck: 3, 4, 10, 9, 7, 5, 6, 2
+Player 1 plays: 8
+Player 2 plays: 3
+Player 1 wins round 14 of game 1!
+
+-- Round 15 (Game 1) --
+Player 1's deck: 1, 8, 3
+Player 2's deck: 4, 10, 9, 7, 5, 6, 2
+Player 1 plays: 1
+Player 2 plays: 4
+Playing a sub-game to determine the winner...
+
+=== Game 5 ===
+
+-- Round 1 (Game 5) --
+Player 1's deck: 8
+Player 2's deck: 10, 9, 7, 5
+Player 1 plays: 8
+Player 2 plays: 10
+Player 2 wins round 1 of game 5!
+The winner of game 5 is player 2!
+
+...anyway, back to game 1.
+Player 2 wins round 15 of game 1!
+
+-- Round 16 (Game 1) --
+Player 1's deck: 8, 3
+Player 2's deck: 10, 9, 7, 5, 6, 2, 4, 1
+Player 1 plays: 8
+Player 2 plays: 10
+Player 2 wins round 16 of game 1!
+
+-- Round 17 (Game 1) --
+Player 1's deck: 3
+Player 2's deck: 9, 7, 5, 6, 2, 4, 1, 10, 8
+Player 1 plays: 3
+Player 2 plays: 9
+Player 2 wins round 17 of game 1!
+The winner of game 1 is player 2!
+
+
+== Post-game results ==
+Player 1's deck:
+Player 2's deck: 7, 5, 6, 2, 4, 1, 10, 8, 9, 3
+After the game, the winning player's score is calculated from the cards they have in their original deck using the same rules as regular Combat. In the above game, the winning player's score is 291.
+
+Defend your honor as Raft Captain by playing the small crab in a game of Recursive Combat using the same two decks as before. What is the winning player's score?
+
+Your puzzle answer was 32760.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
+

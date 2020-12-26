@@ -1,57 +1,83 @@
---- Day 5: Binary Boarding ---
-You board your plane only to discover a new problem: you dropped your boarding pass! You aren't sure which seat is yours, and all of the flight attendants are busy with the flood of people that suddenly made it through passport control.
+--- Day 9: Encoding Error ---
+With your neighbor happily enjoying their video game, you turn your attention to an open data port on the little screen in the seat in front of you.
 
-You write a quick program to use your phone's camera to scan all of the nearby boarding passes (your puzzle input); perhaps you can find your seat through process of elimination.
+Though the port is non-standard, you manage to connect it to your computer through the clever use of several paperclips. Upon connection, the port outputs a series of numbers (your puzzle input).
 
-Instead of zones or groups, this airline uses binary space partitioning to seat people. A seat might be specified like FBFBBFFRLR, where F means "front", B means "back", L means "left", and R means "right".
+The data appears to be encrypted with the eXchange-Masking Addition System (XMAS) which, conveniently for you, is an old cypher with an important weakness.
 
-The first 7 characters will either be F or B; these specify exactly one of the 128 rows on the plane (numbered 0 through 127). Each letter tells you which half of a region the given seat is in. Start with the whole list of rows; the first letter indicates whether the seat is in the front (0 through 63) or the back (64 through 127). The next letter indicates which half of that region the seat is in, and so on until you're left with exactly one row.
+XMAS starts by transmitting a preamble of 25 numbers. After that, each number you receive should be the sum of any two of the 25 immediately previous numbers. The two numbers will have different values, and there might be more than one such pair.
 
-For example, consider just the first seven characters of FBFBBFFRLR:
+For example, suppose your preamble consists of the numbers 1 through 25 in a random order. To be valid, the next number must be the sum of two of those numbers:
 
-Start by considering the whole range, rows 0 through 127.
-F means to take the lower half, keeping rows 0 through 63.
-B means to take the upper half, keeping rows 32 through 63.
-F means to take the lower half, keeping rows 32 through 47.
-B means to take the upper half, keeping rows 40 through 47.
-B keeps rows 44 through 47.
-F keeps rows 44 through 45.
-The final F keeps the lower of the two, row 44.
-The last three characters will be either L or R; these specify exactly one of the 8 columns of seats on the plane (numbered 0 through 7). The same process as above proceeds again, this time with only three steps. L means to keep the lower half, while R means to keep the upper half.
+26 would be a valid next number, as it could be 1 plus 25 (or many other pairs, like 2 and 24).
+49 would be a valid next number, as it is the sum of 24 and 25.
+100 would not be valid; no two of the previous 25 numbers sum to 100.
+50 would also not be valid; although 25 appears in the previous 25 numbers, the two numbers in the pair must be different.
+Suppose the 26th number is 45, and the first number (no longer an option, as it is more than 25 numbers ago) was 20. Now, for the next number to be valid, there needs to be some pair of numbers among 1-19, 21-25, or 45 that add up to it:
 
-For example, consider just the last 3 characters of FBFBBFFRLR:
+26 would still be a valid next number, as 1 and 25 are still within the previous 25 numbers.
+65 would not be valid, as no two of the available numbers sum to it.
+64 and 66 would both be valid, as they are the result of 19+45 and 21+45 respectively.
+Here is a larger example which only considers the previous 5 numbers (and has a preamble of length 5):
 
-Start by considering the whole range, columns 0 through 7.
-R means to take the upper half, keeping columns 4 through 7.
-L means to take the lower half, keeping columns 4 through 5.
-The final R keeps the upper of the two, column 5.
-So, decoding FBFBBFFRLR reveals that it is the seat at row 44, column 5.
+35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576
+In this example, after the 5-number preamble, almost every number is the sum of two of the previous 5 numbers; the only number that does not follow this rule is 127.
 
-Every seat also has a unique seat ID: multiply the row by 8, then add the column. In this example, the seat has ID 44 * 8 + 5 = 357.
+The first step of attacking the weakness in the XMAS data is to find the first number in the list (after the preamble) which is not the sum of two of the 25 numbers before it. What is the first number that does not have this property?
 
-Here are some other boarding passes:
-
-BFFFBBFRRR: row 70, column 7, seat ID 567.
-FFFBBBFRRR: row 14, column 7, seat ID 119.
-BBFFBBFRLL: row 102, column 4, seat ID 820.
-As a sanity check, look through your list of boarding passes. What is the highest seat ID on a boarding pass?
-
-Your puzzle answer was 919.
+Your puzzle answer was 248131121.
 
 --- Part Two ---
-Ding! The "fasten seat belt" signs have turned on. Time to find your seat.
+The final step in breaking the XMAS encryption relies on the invalid number you just found: you must find a contiguous set of at least two numbers in your list which sum to the invalid number from step 1.
 
-It's a completely full flight, so your seat should be the only missing boarding pass in your list. However, there's a catch: some of the seats at the very front and back of the plane don't exist on this aircraft, so they'll be missing from your list as well.
+Again consider the above example:
 
-Your seat wasn't at the very front or back, though; the seats with IDs +1 and -1 from yours will be in your list.
+35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576
+In this list, adding up all of the numbers from 15 through 40 produces the invalid number from step 1, 127. (Of course, the contiguous set of numbers in your actual list might be much longer.)
 
-What is the ID of your seat?
+To find the encryption weakness, add together the smallest and largest number in this contiguous range; in this example, these are 15 and 47, producing 62.
 
-Your puzzle answer was 642.
+What is the encryption weakness in your XMAS-encrypted list of numbers?
+
+Your puzzle answer was 31580383.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
-
-At this point, you should return to your Advent calendar and try another puzzle.
-
-If you still want to see it, you can get your puzzle input.
 

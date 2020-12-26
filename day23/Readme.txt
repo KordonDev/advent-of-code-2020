@@ -1,134 +1,92 @@
---- Day 19: Monster Messages ---
-You land in an airport surrounded by dense forest. As you walk to your high-speed train, the Elves at the Mythical Information Bureau contact you again. They think their satellite has collected an image of a sea monster! Unfortunately, the connection to the satellite is having problems, and many of the messages sent back from the satellite have been corrupted.
+--- Day 23: Crab Cups ---
+The small crab challenges you to a game! The crab is going to mix up some cups, and you have to predict where they'll end up.
 
-They sent you a list of the rules valid messages should obey and a list of received messages they've collected so far (your puzzle input).
+The cups will be arranged in a circle and labeled clockwise (your puzzle input). For example, if your labeling were 32415, there would be five cups in the circle; going clockwise around the circle from the first cup, the cups would be labeled 3, 2, 4, 1, 5, and then back to 3 again.
 
-The rules for valid messages (the top part of your puzzle input) are numbered and build upon each other. For example:
+Before the crab starts, it will designate the first cup in your list as the current cup. The crab is then going to do 100 moves.
 
-0: 1 2
-1: "a"
-2: 1 3 | 3 1
-3: "b"
-Some rules, like 3: "b", simply match a single character (in this case, b).
+Each move, the crab does the following actions:
 
-The remaining rules list the sub-rules that must be followed; for example, the rule 0: 1 2 means that to match rule 0, the text being checked must match rule 1, and the text after the part that matched rule 1 must then match rule 2.
+The crab picks up the three cups that are immediately clockwise of the current cup. They are removed from the circle; cup spacing is adjusted as necessary to maintain the circle.
+The crab selects a destination cup: the cup with a label equal to the current cup's label minus one. If this would select one of the cups that was just picked up, the crab will keep subtracting one until it finds a cup that wasn't just picked up. If at any point in this process the value goes below the lowest value on any cup's label, it wraps around to the highest value on any cup's label instead.
+The crab places the cups it just picked up so that they are immediately clockwise of the destination cup. They keep the same order as when they were picked up.
+The crab selects a new current cup: the cup which is immediately clockwise of the current cup.
+For example, suppose your cup labeling were 389125467. If the crab were to do merely 10 moves, the following changes would occur:
 
-Some of the rules have multiple lists of sub-rules separated by a pipe (|). This means that at least one list of sub-rules must match. (The ones that match might be different each time the rule is encountered.) For example, the rule 2: 1 3 | 3 1 means that to match rule 2, the text being checked must match rule 1 followed by rule 3 or it must match rule 3 followed by rule 1.
+-- move 1 --
+cups: (3) 8  9  1  2  5  4  6  7
+pick up: 8, 9, 1
+destination: 2
 
-Fortunately, there are no loops in the rules, so the list of possible matches will be finite. Since rule 1 matches a and rule 3 matches b, rule 2 matches either ab or ba. Therefore, rule 0 matches aab or aba.
+-- move 2 --
+cups:  3 (2) 8  9  1  5  4  6  7
+pick up: 8, 9, 1
+destination: 7
 
-Here's a more interesting example:
+-- move 3 --
+cups:  3  2 (5) 4  6  7  8  9  1
+pick up: 4, 6, 7
+destination: 3
 
-0: 4 1 5
-1: 2 3 | 3 2
-2: 4 4 | 5 5
-3: 4 5 | 5 4
-4: "a"
-5: "b"
-Here, because rule 4 matches a and rule 5 matches b, rule 2 matches two letters that are the same (aa or bb), and rule 3 matches two letters that are different (ab or ba).
+-- move 4 --
+cups:  7  2  5 (8) 9  1  3  4  6
+pick up: 9, 1, 3
+destination: 7
 
-Since rule 1 matches rules 2 and 3 once each in either order, it must match two pairs of letters, one pair with matching letters and one pair with different letters. This leaves eight possibilities: aaab, aaba, bbab, bbba, abaa, abbb, baaa, or babb.
+-- move 5 --
+cups:  3  2  5  8 (4) 6  7  9  1
+pick up: 6, 7, 9
+destination: 3
 
-Rule 0, therefore, matches a (rule 4), then any of the eight options from rule 1, then b (rule 5): aaaabb, aaabab, abbabb, abbbab, aabaab, aabbbb, abaaab, or ababbb.
+-- move 6 --
+cups:  9  2  5  8  4 (1) 3  6  7
+pick up: 3, 6, 7
+destination: 9
 
-The received messages (the bottom part of your puzzle input) need to be checked against the rules so you can determine which are valid and which are corrupted. Including the rules and the messages together, this might look like:
+-- move 7 --
+cups:  7  2  5  8  4  1 (9) 3  6
+pick up: 3, 6, 7
+destination: 8
 
-0: 4 1 5
-1: 2 3 | 3 2
-2: 4 4 | 5 5
-3: 4 5 | 5 4
-4: "a"
-5: "b"
+-- move 8 --
+cups:  8  3  6  7  4  1  9 (2) 5
+pick up: 5, 8, 3
+destination: 1
 
-ababbb
-bababa
-abbbab
-aaabbb
-aaaabbb
-Your goal is to determine the number of messages that completely match rule 0. In the above example, ababbb and abbbab match, but bababa, aaabbb, and aaaabbb do not, producing the answer 2. The whole message must match all of rule 0; there can't be extra unmatched characters in the message. (For example, aaaabbb might appear to match rule 0 above, but it has an extra unmatched b on the end.)
+-- move 9 --
+cups:  7  4  1  5  8  3  9  2 (6)
+pick up: 7, 4, 1
+destination: 5
 
-How many messages completely match rule 0?
+-- move 10 --
+cups: (5) 7  4  1  8  3  9  2  6
+pick up: 7, 4, 1
+destination: 3
 
-Your puzzle answer was 222.
+-- final --
+cups:  5 (8) 3  7  4  1  9  2  6
+In the above example, the cups' values are the labels as they appear moving clockwise around the circle; the current cup is marked with ( ).
+
+After the crab is done, what order will the cups be in? Starting after the cup labeled 1, collect the other cups' labels clockwise into a single string with no extra characters; each number except 1 should appear exactly once. In the above example, after 10 moves, the cups clockwise from 1 are labeled 9, 2, 6, 5, and so on, producing 92658374. If the crab were to complete all 100 moves, the order after cup 1 would be 67384529.
+
+Using your labeling, simulate 100 moves. What are the labels on the cups after cup 1?
+
+Your puzzle answer was 97342568.
 
 --- Part Two ---
-As you look over the list of messages, you realize your matching rules aren't quite right. To fix them, completely replace rules 8: 42 and 11: 42 31 with the following:
+Due to what you can only assume is a mistranslation (you're not exactly fluent in Crab), you are quite surprised when the crab starts arranging many cups in a circle on your raft - one million (1000000) in total.
 
-8: 42 | 42 8
-11: 42 31 | 42 11 31
-This small change has a big impact: now, the rules do contain loops, and the list of messages they could hypothetically match is infinite. You'll need to determine how these changes affect which messages are valid.
+Your labeling is still correct for the first few cups; after that, the remaining cups are just numbered in an increasing fashion starting from the number after the highest number in your list and proceeding one by one until one million is reached. (For example, if your labeling were 54321, the cups would be numbered 5, 4, 3, 2, 1, and then start counting up from 6 until one million is reached.) In this way, every number from one through one million is used exactly once.
 
-Fortunately, many of the rules are unaffected by this change; it might help to start by looking at which rules always match the same set of values and how those rules (especially rules 42 and 31) are used by the new versions of rules 8 and 11.
+After discovering where you made the mistake in translating Crab Numbers, you realize the small crab isn't going to do merely 100 moves; the crab is going to do ten million (10000000) moves!
 
-(Remember, you only need to handle the rules you have; building a solution that could handle any hypothetical combination of rules would be significantly more difficult.)
+The crab is going to hide your stars - one each - under the two cups that will end up immediately clockwise of cup 1. You can have them if you predict what the labels on those cups will be when the crab is finished.
 
-For example:
+In the above example (389125467), this would be 934001 and then 159792; multiplying these together produces 149245887792.
 
-42: 9 14 | 10 1
-9: 14 27 | 1 26
-10: 23 14 | 28 1
-1: "a"
-11: 42 31
-5: 1 14 | 15 1
-19: 14 1 | 14 14
-12: 24 14 | 19 1
-16: 15 1 | 14 14
-31: 14 17 | 1 13
-6: 14 14 | 1 14
-2: 1 24 | 14 4
-0: 8 11
-13: 14 3 | 1 12
-15: 1 | 14
-17: 14 2 | 1 7
-23: 25 1 | 22 14
-28: 16 1
-4: 1 1
-20: 14 14 | 1 15
-3: 5 14 | 16 1
-27: 1 6 | 14 18
-14: "b"
-21: 14 1 | 1 14
-25: 1 1 | 1 14
-22: 14 14
-8: 42
-26: 14 22 | 1 20
-18: 15 15
-7: 14 5 | 1 21
-24: 14 1
+Determine which two cups will end up immediately clockwise of cup 1. What do you get if you multiply their labels together?
 
-abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa
-bbabbbbaabaabba
-babbbbaabbbbbabbbbbbaabaaabaaa
-aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-bbbbbbbaaaabbbbaaabbabaaa
-bbbababbbbaaaaaaaabbababaaababaabab
-ababaaaaaabaaab
-ababaaaaabbbaba
-baabbaaaabbaaaababbaababb
-abbbbabbbbaaaababbbbbbaaaababb
-aaaaabbaabaaaaababaa
-aaaabbaaaabbaaa
-aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-babaaabbbaaabaababbaabababaaab
-aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba
-Without updating rules 8 and 11, these rules only match three messages: bbabbbbaabaabba, ababaaaaaabaaab, and ababaaaaabbbaba.
-
-However, after updating rules 8 and 11, a total of 12 messages match:
-
-bbabbbbaabaabba
-babbbbaabbbbbabbbbbbaabaaabaaa
-aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-bbbbbbbaaaabbbbaaabbabaaa
-bbbababbbbaaaaaaaabbababaaababaabab
-ababaaaaaabaaab
-ababaaaaabbbaba
-baabbaaaabbaaaababbaababb
-abbbbabbbbaaaababbbbbbaaaababb
-aaaaabbaabaaaaababaa
-aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba
-After updating rules 8 and 11, how many messages completely match rule 0?
-
-Your puzzle answer was 339.
+Your puzzle answer was 902208073192.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
+

@@ -1,57 +1,61 @@
---- Day 5: Binary Boarding ---
-You board your plane only to discover a new problem: you dropped your boarding pass! You aren't sure which seat is yours, and all of the flight attendants are busy with the flood of people that suddenly made it through passport control.
+--- Day 7: Handy Haversacks ---
+You land at the regional airport in time for your next flight. In fact, it looks like you'll even have time to grab some food: all flights are currently delayed due to issues in luggage processing.
 
-You write a quick program to use your phone's camera to scan all of the nearby boarding passes (your puzzle input); perhaps you can find your seat through process of elimination.
+Due to recent aviation regulations, many rules (your puzzle input) are being enforced about bags and their contents; bags must be color-coded and must contain specific quantities of other color-coded bags. Apparently, nobody responsible for these regulations considered how long they would take to enforce!
 
-Instead of zones or groups, this airline uses binary space partitioning to seat people. A seat might be specified like FBFBBFFRLR, where F means "front", B means "back", L means "left", and R means "right".
+For example, consider the following rules:
 
-The first 7 characters will either be F or B; these specify exactly one of the 128 rows on the plane (numbered 0 through 127). Each letter tells you which half of a region the given seat is in. Start with the whole list of rows; the first letter indicates whether the seat is in the front (0 through 63) or the back (64 through 127). The next letter indicates which half of that region the seat is in, and so on until you're left with exactly one row.
+light red bags contain 1 bright white bag, 2 muted yellow bags.
+dark orange bags contain 3 bright white bags, 4 muted yellow bags.
+bright white bags contain 1 shiny gold bag.
+muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.
+shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
+dark olive bags contain 3 faded blue bags, 4 dotted black bags.
+vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
+faded blue bags contain no other bags.
+dotted black bags contain no other bags.
+These rules specify the required contents for 9 bag types. In this example, every faded blue bag is empty, every vibrant plum bag contains 11 bags (5 faded blue and 6 dotted black), and so on.
 
-For example, consider just the first seven characters of FBFBBFFRLR:
+You have a shiny gold bag. If you wanted to carry it in at least one other bag, how many different bag colors would be valid for the outermost bag? (In other words: how many colors can, eventually, contain at least one shiny gold bag?)
 
-Start by considering the whole range, rows 0 through 127.
-F means to take the lower half, keeping rows 0 through 63.
-B means to take the upper half, keeping rows 32 through 63.
-F means to take the lower half, keeping rows 32 through 47.
-B means to take the upper half, keeping rows 40 through 47.
-B keeps rows 44 through 47.
-F keeps rows 44 through 45.
-The final F keeps the lower of the two, row 44.
-The last three characters will be either L or R; these specify exactly one of the 8 columns of seats on the plane (numbered 0 through 7). The same process as above proceeds again, this time with only three steps. L means to keep the lower half, while R means to keep the upper half.
+In the above rules, the following options would be available to you:
 
-For example, consider just the last 3 characters of FBFBBFFRLR:
+A bright white bag, which can hold your shiny gold bag directly.
+A muted yellow bag, which can hold your shiny gold bag directly, plus some other bags.
+A dark orange bag, which can hold bright white and muted yellow bags, either of which could then hold your shiny gold bag.
+A light red bag, which can hold bright white and muted yellow bags, either of which could then hold your shiny gold bag.
+So, in this example, the number of bag colors that can eventually contain at least one shiny gold bag is 4.
 
-Start by considering the whole range, columns 0 through 7.
-R means to take the upper half, keeping columns 4 through 7.
-L means to take the lower half, keeping columns 4 through 5.
-The final R keeps the upper of the two, column 5.
-So, decoding FBFBBFFRLR reveals that it is the seat at row 44, column 5.
+How many bag colors can eventually contain at least one shiny gold bag? (The list of rules is quite long; make sure you get all of it.)
 
-Every seat also has a unique seat ID: multiply the row by 8, then add the column. In this example, the seat has ID 44 * 8 + 5 = 357.
-
-Here are some other boarding passes:
-
-BFFFBBFRRR: row 70, column 7, seat ID 567.
-FFFBBBFRRR: row 14, column 7, seat ID 119.
-BBFFBBFRLL: row 102, column 4, seat ID 820.
-As a sanity check, look through your list of boarding passes. What is the highest seat ID on a boarding pass?
-
-Your puzzle answer was 919.
+Your puzzle answer was 242.
 
 --- Part Two ---
-Ding! The "fasten seat belt" signs have turned on. Time to find your seat.
+It's getting pretty expensive to fly these days - not because of ticket prices, but because of the ridiculous number of bags you need to buy!
 
-It's a completely full flight, so your seat should be the only missing boarding pass in your list. However, there's a catch: some of the seats at the very front and back of the plane don't exist on this aircraft, so they'll be missing from your list as well.
+Consider again your shiny gold bag and the rules from the above example:
 
-Your seat wasn't at the very front or back, though; the seats with IDs +1 and -1 from yours will be in your list.
+faded blue bags contain 0 other bags.
+dotted black bags contain 0 other bags.
+vibrant plum bags contain 11 other bags: 5 faded blue bags and 6 dotted black bags.
+dark olive bags contain 7 other bags: 3 faded blue bags and 4 dotted black bags.
+So, a single shiny gold bag must contain 1 dark olive bag (and the 7 bags within it) plus 2 vibrant plum bags (and the 11 bags within each of those): 1 + 1*7 + 2 + 2*11 = 32 bags!
 
-What is the ID of your seat?
+Of course, the actual rules have a small chance of going several levels deeper than this example; be sure to count all of the bags, even if the nesting becomes topologically impractical!
 
-Your puzzle answer was 642.
+Here's another example:
+
+shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.
+In this example, a single shiny gold bag must contain 126 other bags.
+
+How many individual bags are required inside your single shiny gold bag?
+
+Your puzzle answer was 176035.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
-
-At this point, you should return to your Advent calendar and try another puzzle.
-
-If you still want to see it, you can get your puzzle input.
-

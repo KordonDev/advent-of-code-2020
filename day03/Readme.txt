@@ -1,4 +1,3 @@
-Tech.
 --- Day 3: Toboggan Trajectory ---
 With the toboggan login problems resolved, you set off toward the airport. While travel by toboggan might be easy, it's certainly not safe: there's very minimal steering and the area is covered in trees. You'll need to see which angles will take you near the fewest trees.
 
@@ -70,9 +69,3 @@ What do you get if you multiply together the number of trees encountered on each
 Your puzzle answer was 2224913600.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
-
-At this point, you should return to your Advent calendar and try another puzzle.
-
-If you still want to see it, you can get your puzzle input.
-
-You can also [Share] this puzzle.
