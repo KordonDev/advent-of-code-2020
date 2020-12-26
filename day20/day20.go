@@ -6,176 +6,469 @@ import (
 )
 
 type Tile struct {
-	id               int
-	borders          []string
-	rotate           int
-	xFlip            bool
-	yFlip            bool
-	topNeigbourID    int
-	rightNeigbourID  int
-	bottomNeigbourID int
-	leftNeigbourID   int
+	id      string
+	right   *Tile
+	left    *Tile
+	top     *Tile
+	bottom  *Tile
+	content []string
 }
 
 func main() {
-	lines := readFile("./test-input.txt")
+	lines := readFile("./input.txt")
 
-	tiles := make(map[int]Tile)
-	var nextTileID int
-	var nextBorders []string
+	var unusedTiles []*Tile
+	var nextTileID string
+	var nextContent []string
 	for _, line := range lines {
 		if len(line) == 0 {
-			tiles[nextTileID] = Tile{
-				id:               nextTileID,
-				borders:          nextBorders,
-				rotate:           0,
-				xFlip:            false,
-				yFlip:            false,
-				topNeigbourID:    -1,
-				rightNeigbourID:  -1,
-				bottomNeigbourID: -1,
-				leftNeigbourID:   -1,
+			nextTile := Tile{
+				id:      nextTileID,
+				content: nextContent,
 			}
-			nextBorders = nil
-			nextTileID = 0
-		}
-		if strings.HasPrefix(line, "Tile") {
-			nextTileID = stringToInt(line[5 : len(line)-1])
-		}
-		if strings.HasPrefix(line, ".") || strings.HasPrefix(line, "#") {
-			if len(nextBorders) == 0 {
-				nextBorders = append(nextBorders, line)
-				nextBorders = append(nextBorders, "")
-				nextBorders = append(nextBorders, "")
-				nextBorders = append(nextBorders, "")
-			}
-			if len(nextBorders[1]) == len(line)-1 {
-				nextBorders[2] = line
-			}
-			nextBorders[1] = nextBorders[1] + string(line[len(line)-1])
-			nextBorders[3] = nextBorders[3] + string(line[0])
+			unusedTiles = append(unusedTiles, &nextTile)
+			nextContent = nil
+		} else if strings.HasPrefix(line, "Tile") {
+			parts := strings.Split(line, " ")
+			nextTileID = strings.ReplaceAll(parts[1], ":", "")
+		} else {
+			nextContent = append(nextContent, line)
 		}
 	}
-	tiles[nextTileID] = Tile{
-		id:               nextTileID,
-		borders:          nextBorders,
-		rotate:           0,
-		xFlip:            false,
-		yFlip:            false,
-		topNeigbourID:    -1,
-		rightNeigbourID:  -1,
-		bottomNeigbourID: -1,
-		leftNeigbourID:   -1,
+	nextTile := Tile{
+		id:      nextTileID,
+		content: nextContent,
+	}
+	unusedTiles = append(unusedTiles, &nextTile)
+
+	startTile, unusedTiles := unusedTiles[0], unusedTiles[1:]
+
+	// Add to right
+	addedRight := true
+	for addedRight {
+		next := startTile
+		for next.right != nil {
+			next = next.right
+		}
+		addedRight, unusedTiles = addTileRight(next, unusedTiles)
 	}
 
-	var tileCornerID int
-	solution := 1
-	for tileIDtoCheck, tileToCheck := range tiles {
-		neighborIDs := make(map[int]bool)
+	// Add to left
+	addedLeft := true
+	for addedLeft {
+		next := startTile
+		for next.left != nil {
+			next = next.left
+		}
+		addedLeft, unusedTiles = addTileLeft(next, unusedTiles)
+	}
+	leftTile := startTile
+	for leftTile.left != nil {
+		leftTile = leftTile.left
+	}
 
-		for tileID, tile := range tiles {
-			if tileID != tileIDtoCheck {
-				if compareWithRotation(&tileToCheck, &tile) {
-					neighborIDs[tileID] = true
+	iter := leftTile
+	for iter != nil {
+		// Add to bottom
+		bottomAdded := true
+		for bottomAdded {
+			next := iter
+			for next.bottom != nil {
+				next = next.bottom
+			}
+			bottomAdded, unusedTiles = addTileBottom(next, unusedTiles)
+		}
+
+		topAdded := true
+		for topAdded {
+			next := iter
+			for next.top != nil {
+				next = next.top
+			}
+			topAdded, unusedTiles = addTileTop(next, unusedTiles)
+		}
+		iter = iter.right
+	}
+
+	fmt.Println("")
+	bigTile := createBigTile(startTile)
+	printTile(&bigTile)
+	seaMonster := searchSeaMonster(&bigTile)
+	fmt.Println(seaMonster, "seaMonster found")
+	seaMonsterHashes := 15
+
+	fmt.Println(countHash(&bigTile) - seaMonster*seaMonsterHashes)
+}
+
+func addTileRight(tile *Tile, unusedTiles []*Tile) (bool, []*Tile) {
+	topTile := tile.top
+	if topTile != nil {
+		topTile = topTile.right
+	}
+	bottobTile := tile.bottom
+	if bottobTile != nil {
+		bottobTile = bottobTile.right
+	}
+
+	for index, possibleTile := range unusedTiles {
+
+		for flip := 0; flip < 3; flip++ {
+			for side := 0; side < 4; side++ {
+
+				fits := true
+				if getRightBorder(tile) != getLeftBorder(possibleTile) {
+					fits = false
 				}
-			}
-		}
-		if len(neighborIDs) == 2 {
-			fmt.Println("corner", tileIDtoCheck)
-			solution = solution * tileIDtoCheck
-			tileCornerID = tileIDtoCheck
-		}
-	}
-
-	fmt.Println("Solution 1:", solution)
-
-	fmt.Println("start", tiles[tileCornerID])
-	/*
-		for tileIDtoCheck, tileToCheck := range tiles {
-			neighborIDs := make(map[int]bool)
-
-			for tileID, tile := range tiles {
-				if tileID != tileIDtoCheck {
-					if compareWithRotation(&tileToCheck, &tile) {
-						neighborIDs[tileID] = true
+				if topTile != nil && getBottomBorder(topTile) != getTopBorder(possibleTile) {
+					fits = false
+				}
+				if bottobTile != nil && getTopBorder(bottobTile) != getBottomBorder(possibleTile) {
+					fits = false
+				}
+				if fits {
+					(*tile).right = possibleTile
+					(*possibleTile).left = tile
+					(*possibleTile).top = topTile
+					(*possibleTile).bottom = bottobTile
+					if topTile != nil {
+						(*topTile).bottom = possibleTile
 					}
+					if bottobTile != nil {
+						(*bottobTile).top = possibleTile
+					}
+					unusedTiles = removeTile(&unusedTiles, index)
+					return true, unusedTiles
 				}
-			}
-			if len(neighborIDs) == 2 {
-				fmt.Println("corner", tileIDtoCheck)
-				solution = solution * tileIDtoCheck
-			}
-		}*/
 
+				rotate(possibleTile)
+			}
+			if flip == 0 {
+				flipHorizontal(possibleTile)
+			}
+			if flip == 1 {
+				flipVertical(possibleTile)
+			}
+		}
+
+	}
+	return false, unusedTiles
 }
 
-func compareAllFourSides(fixedTile *Tile, tileToCompare *Tile) bool {
-	for rotate := 0; rotate <= 3; rotate++ {
-		if (*fixedTile).borders[0] == (*tileToCompare).borders[(rotate)%4] {
-			(*tileToCompare).rotate = rotate
-			(*fixedTile).topNeigbourID = 4 //(*tileToCompare).id
-			(*tileToCompare).bottomNeigbourID = (*fixedTile).id
-			fmt.Println((*tileToCompare).id, "0", *fixedTile)
-			return true
-		}
-		if (*fixedTile).borders[1] == (*tileToCompare).borders[(1+rotate)%4] {
-			(*tileToCompare).rotate = rotate
-			(*fixedTile).rightNeigbourID = (*tileToCompare).id
-			(*tileToCompare).leftNeigbourID = (*fixedTile).id
-			fmt.Println((*tileToCompare).id, "1")
-			return true
-		}
-		if (*fixedTile).borders[2] == (*tileToCompare).borders[(2+rotate)%4] {
-			(*tileToCompare).rotate = rotate
-			(*fixedTile).bottomNeigbourID = (*tileToCompare).id
-			(*tileToCompare).topNeigbourID = (*fixedTile).id
-			fmt.Println((*tileToCompare).id, "2")
-			return true
-		}
-		if (*fixedTile).borders[3] == (*tileToCompare).borders[(3+rotate)%4] {
-			(*tileToCompare).rotate = rotate
-			(*fixedTile).leftNeigbourID = (*tileToCompare).id
-			(*tileToCompare).rightNeigbourID = (*fixedTile).id
-			fmt.Println((*tileToCompare).id, "3")
-			return true
-		}
+func addTileLeft(tile *Tile, unusedTiles []*Tile) (bool, []*Tile) {
+	topTile := tile.top
+	if topTile != nil {
+		topTile = topTile.left
 	}
-	return false
+	bottobTile := tile.bottom
+	if bottobTile != nil {
+		bottobTile = bottobTile.left
+	}
+
+	for index, possibleTile := range unusedTiles {
+
+		for flip := 0; flip < 3; flip++ {
+			for side := 0; side < 4; side++ {
+
+				fits := true
+				if getLeftBorder(tile) != getRightBorder(possibleTile) {
+					fits = false
+				}
+				if topTile != nil && getBottomBorder(topTile) != getTopBorder(possibleTile) {
+					fits = false
+				}
+				if bottobTile != nil && getTopBorder(bottobTile) != getBottomBorder(possibleTile) {
+					fits = false
+				}
+				if fits {
+					(*tile).left = possibleTile
+					(*possibleTile).right = tile
+					(*possibleTile).top = topTile
+					(*possibleTile).bottom = bottobTile
+					if topTile != nil {
+						(*topTile).bottom = possibleTile
+					}
+					if bottobTile != nil {
+						(*bottobTile).top = possibleTile
+					}
+					unusedTiles = removeTile(&unusedTiles, index)
+					return true, unusedTiles
+				}
+
+				rotate(possibleTile)
+			}
+			if flip == 0 {
+				flipHorizontal(possibleTile)
+			}
+			if flip == 1 {
+				flipVertical(possibleTile)
+			}
+		}
+
+	}
+	return false, unusedTiles
 }
 
-func compareWithRotation(fixedTile *Tile, tileToCompare *Tile) bool {
-	borders := (*tileToCompare).borders
-	tileToCompareIsConnected := hasNeighbour(tileToCompare)
-
-	if compareAllFourSides(fixedTile, tileToCompare) {
-		return true
+func addTileBottom(tile *Tile, unusedTiles []*Tile) (bool, []*Tile) {
+	rightTile := tile.right
+	if rightTile != nil {
+		rightTile = rightTile.bottom
+	}
+	leftTile := tile.left
+	if leftTile != nil {
+		leftTile = leftTile.bottom
 	}
 
-	if tileToCompareIsConnected {
+	for index, possibleTile := range unusedTiles {
+
+		for flip := 0; flip < 3; flip++ {
+			for side := 0; side < 4; side++ {
+
+				fits := true
+				if getBottomBorder(tile) != getTopBorder(possibleTile) {
+					fits = false
+				}
+				if rightTile != nil && getLeftBorder(rightTile) != getRightBorder(possibleTile) {
+					fits = false
+				}
+				if leftTile != nil && getRightBorder(leftTile) != getLeftBorder(possibleTile) {
+					fits = false
+				}
+				if fits {
+					(*tile).bottom = possibleTile
+					(*possibleTile).top = tile
+					(*possibleTile).right = rightTile
+					(*possibleTile).left = leftTile
+					if rightTile != nil {
+						(*rightTile).left = possibleTile
+					}
+					if leftTile != nil {
+						(*leftTile).right = possibleTile
+					}
+					unusedTiles = removeTile(&unusedTiles, index)
+					return true, unusedTiles
+				}
+
+				rotate(possibleTile)
+			}
+			if flip == 0 {
+				flipHorizontal(possibleTile)
+			}
+			if flip == 1 {
+				flipVertical(possibleTile)
+			}
+		}
+
+	}
+	return false, unusedTiles
+}
+
+func addTileTop(tile *Tile, unusedTiles []*Tile) (bool, []*Tile) {
+	rightTile := tile.right
+	if rightTile != nil {
+		rightTile = rightTile.top
+	}
+	leftTile := tile.left
+	if leftTile != nil {
+		leftTile = leftTile.top
+	}
+
+	for index, possibleTile := range unusedTiles {
+
+		for flip := 0; flip < 3; flip++ {
+			for side := 0; side < 4; side++ {
+
+				fits := true
+				if getTopBorder(tile) != getBottomBorder(possibleTile) {
+					fits = false
+				}
+				if rightTile != nil && getLeftBorder(rightTile) != getRightBorder(possibleTile) {
+					fits = false
+				}
+				if leftTile != nil && getRightBorder(leftTile) != getLeftBorder(possibleTile) {
+					fits = false
+				}
+				if fits {
+					(*tile).top = possibleTile
+					(*possibleTile).bottom = tile
+					(*possibleTile).right = rightTile
+					(*possibleTile).left = leftTile
+					if rightTile != nil {
+						(*rightTile).left = possibleTile
+					}
+					if leftTile != nil {
+						(*leftTile).right = possibleTile
+					}
+					unusedTiles = removeTile(&unusedTiles, index)
+					return true, unusedTiles
+				}
+
+				rotate(possibleTile)
+			}
+			if flip == 0 {
+				flipHorizontal(possibleTile)
+			}
+			if flip == 1 {
+				flipVertical(possibleTile)
+			}
+		}
+
+	}
+	return false, unusedTiles
+}
+func searchSeaMonster(tile *Tile) int {
+	for flip := 0; flip < 3; flip++ {
+		for side := 0; side < 4; side++ {
+			foundSeaMonsters := findMonster(tile)
+			if foundSeaMonsters > 0 {
+				return foundSeaMonsters
+			}
+
+			rotate(tile)
+		}
+		if flip == 0 {
+			flipHorizontal(tile)
+		}
+		if flip == 1 {
+			flipVertical(tile)
+		}
+	}
+	return 0
+}
+
+func findMonster(tile *Tile) int {
+	seaMonsterWidth := 20
+	seaMonsterHeight := 3
+	content := (*tile).content
+	monsters := 0
+	for row := 0; row+seaMonsterHeight <= len(content); row++ {
+		for column := 0; column+seaMonsterWidth <= len(content[0]); column++ {
+			row1 := content[row][column:]
+			row2 := content[row+1][column:]
+			row3 := content[row+2][column:]
+			if isMonster(row1, row2, row3) {
+				fmt.Println("Found monster at", column, row)
+				monsters++
+			}
+		}
+	}
+	return monsters
+}
+
+func isMonster(row1 string, row2 string, row3 string) bool {
+	if row1[18] != '#' {
 		return false
 	}
-
-	xFlipedBorders := []string{Reverse(borders[0]), borders[3], Reverse(borders[2]), borders[1]}
-	(*tileToCompare).borders = xFlipedBorders
-	(*tileToCompare).xFlip = true
-	if compareAllFourSides(fixedTile, tileToCompare) {
-		return true
+	row2Indices := []int{0, 5, 6, 11, 12, 17, 18, 19}
+	for _, index := range row2Indices {
+		if row2[index] != '#' {
+			return false
+		}
 	}
-	yFlipedBorders := []string{borders[2], Reverse(borders[1]), borders[0], Reverse(borders[3])}
-	(*tileToCompare).borders = yFlipedBorders
-	(*tileToCompare).xFlip = false
-	(*tileToCompare).yFlip = true
-	if compareAllFourSides(fixedTile, tileToCompare) {
-		return true
+	row3Indices := []int{1, 4, 7, 10, 13, 16}
+	for _, index := range row3Indices {
+		if row3[index] != '#' {
+			return false
+		}
 	}
-	(*tileToCompare).borders = borders
-	(*tileToCompare).yFlip = false
-
-	return false
+	return true
 }
 
-func hasNeighbour(tile *Tile) bool {
-	return (*tile).topNeigbourID != -1 || (*tile).rightNeigbourID != -1 || (*tile).bottomNeigbourID != -1 || (*tile).leftNeigbourID != -1
+func createBigTile(startTile *Tile) Tile {
+	topLeftTile := startTile
+	for topLeftTile.left != nil {
+		topLeftTile = topLeftTile.left
+	}
+	for topLeftTile.top != nil {
+		topLeftTile = topLeftTile.top
+	}
+	iter := topLeftTile
+	var content []string
+	for iter != nil {
+		nextRows := getFullRow(iter)
+		content = append(content, nextRows[1:len(nextRows)-1]...)
+		iter = iter.bottom
+	}
+	return Tile{
+		id:      "full",
+		content: content,
+	}
+}
+
+func getFullRow(leftTile *Tile) []string {
+	var content []string
+	for i := 0; i < len((*leftTile).content); i++ {
+		content = append(content, "")
+	}
+	iter := leftTile
+	for iter != nil {
+		for index, row := range (*iter).content {
+			content[index] = content[index] + row[1:len(row)-1]
+		}
+		iter = iter.right
+	}
+	return content
+}
+
+func countHash(tile *Tile) int {
+	result := 0
+	for _, row := range (*tile).content {
+		result = result + strings.Count(row, "#")
+	}
+	return result
+}
+
+func removeTile(list *[]*Tile, index int) []*Tile {
+	(*list)[index] = (*list)[len(*list)-1]
+	_, newList := (*list)[len(*list)-1], (*list)[:len(*list)-1]
+	return newList
+}
+
+func getTopBorder(tile *Tile) string {
+	return (*tile).content[0]
+}
+
+func getBottomBorder(tile *Tile) string {
+	return (*tile).content[len((*tile).content)-1]
+}
+
+func getLeftBorder(tile *Tile) string {
+	return getColumn(tile, 0)
+}
+
+func getRightBorder(tile *Tile) string {
+	return getColumn(tile, len((*tile).content[0])-1)
+}
+
+func rotate(tile *Tile) {
+	var newContent []string
+	for i := 1; i <= len((*tile).content[0]); i++ {
+		newContent = append(newContent, getColumn(tile, len((*tile).content[0])-i))
+	}
+	(*tile).content = newContent
+}
+
+func getColumn(tile *Tile, columnNumber int) string {
+	column := ""
+	for _, row := range (*tile).content {
+		column = column + string(row[columnNumber])
+	}
+	return column
+}
+
+func flipHorizontal(tile *Tile) {
+	var newContent []string
+	for i := 0; i < len((*tile).content); i++ {
+		newContent = append(newContent, (*tile).content[len((*tile).content)-1-i])
+	}
+	(*tile).content = newContent
+}
+
+func flipVertical(tile *Tile) {
+	var newContent []string
+	for _, row := range (*tile).content {
+		newContent = append(newContent, Reverse(row))
+	}
+	(*tile).content = newContent
 }
 
 func Reverse(s string) (result string) {
@@ -183,4 +476,11 @@ func Reverse(s string) (result string) {
 		result = string(v) + result
 	}
 	return
+}
+
+func printTile(tile *Tile) {
+	fmt.Println((*tile).id)
+	for _, row := range (*tile).content {
+		fmt.Println(row)
+	}
 }
